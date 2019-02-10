@@ -1,0 +1,17 @@
+version: '2'
+services:
+  hubot:
+    restart: always
+    image: "hubot:latest"
+    environment:
+      - REDIS_URL=redis://redis:6379/hubot
+    env_file: slack.key
+    volumes:
+      - ./scripts:/home/user/scripts:ro
+      - ./external-scripts.json:/home/user/external-scripts.json:ro
+    depends_on:
+      - redis
+  redis:
+    image: "redis:alpine"
+    volumes:
+      - ./cache:/data
