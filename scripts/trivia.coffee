@@ -5,11 +5,12 @@
 #   hubot trivia answer
 
 fuzzy = require('fuzzy-matching')
+continuous = true
 
 module.exports = (robot) ->
   all_questions = () -> robot.brain.data.questions ?= {}
 
-  robot.respond /trivia question/, (msg) ->
+  askQuestion = (msg) ->
     # This random IP is from http://www.randomtriviagenerator.com/#/
     robot.http('http://159.203.60.127/questions?limit=1').get() (err, res, body) ->
       d = JSON.parse(body)
@@ -31,6 +32,9 @@ module.exports = (robot) ->
       }
       msg.send "[#{categories}] #{question}"
 
+  robot.respond /trivia question/, (msg) ->
+    askQuestion(msg)
+
   robot.respond /trivia answer/, (msg) ->
     room_question = all_questions[msg.envelope.room]
     if room_question == undefined || room_question.answer == null
@@ -38,6 +42,8 @@ module.exports = (robot) ->
     else
       msg.send "#{room_question.question} -- #{room_question.answer}"
       delete all_questions[msg.envelope.room]
+    if continuous
+      askQuestion(msg)
 
   robot.hear /(.+)/, (msg) ->
     room_question = all_questions[msg.envelope.room]
@@ -47,3 +53,7 @@ module.exports = (robot) ->
       if r.distance > 0.85
         msg.send "Correct!! #{room_question.question} -- #{room_question.answer}"
         delete all_questions[msg.envelope.room]
+
+  robot.respond /fuck.+question/, (msg) ->
+    msg.send "Sorry :("
+    askQuestion(msg)
