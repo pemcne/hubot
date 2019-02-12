@@ -7,6 +7,18 @@
 fuzzy = require('fuzzy-matching')
 continuous = true
 
+pruneAnswer = (answer) ->
+  out = [answer]
+  # Remove any a/an/the/or
+  article_answer = answer.replace(/(a|an|the)\s+/gi, '')
+  if article_answer != answer
+    out.push(article_answer)
+  # Remove punctuation
+  punc_answer = answer.replace(/(\.|,|&|!)/g, '')
+  if punc_answer != answer
+    out.push(article_answer)
+  return out
+
 module.exports = (robot) ->
   all_questions = () -> robot.brain.data.questions ?= {}
 
@@ -16,13 +28,7 @@ module.exports = (robot) ->
       d = JSON.parse(body)
       question = d.question
       answer = d.answer
-      fuzzy_answer = [answer]
-      prune_answer = answer.replace(/^(a|the)\s*/i, '')
-      if prune_answer != answer
-        fuzzy_answer.push(prune_answer)
-      strip_abbre = answer.replace(/\./g, '')
-      if strip_abbre != answer
-        fuzzy_answer.push(prune_answer)
+      fuzzy_answer = pruneAnswer(answer)
       answer_match = new fuzzy(fuzzy_answer)
       categories = d['categories'].join(', ')
       all_questions[msg.envelope.room] = {
@@ -32,18 +38,22 @@ module.exports = (robot) ->
       }
       msg.send "[#{categories}] #{question}"
 
+  answerQuestion = (correct, msg) ->
+    room_question = all_questions[msg.envelope.room]
+    if room_question == undefined || room_question.answer == null
+      msg.send "Ask a question first"
+      return
+    correctStr = correct ? "Correct!!" : ""
+    msg.send "#{correctStr} #{room_question.question} -- #{room_question.answer}"
+    delete all_questions[msg.envelope.room]
+    if continuous
+      askQuestion(msg)
+
   robot.respond /trivia question/, (msg) ->
     askQuestion(msg)
 
   robot.respond /trivia answer/, (msg) ->
-    room_question = all_questions[msg.envelope.room]
-    if room_question == undefined || room_question.answer == null
-      msg.send "Ask a question first"
-    else
-      msg.send "#{room_question.question} -- #{room_question.answer}"
-      delete all_questions[msg.envelope.room]
-    if continuous
-      askQuestion(msg)
+    answer_question(false, msg)
 
   robot.hear /(.+)/, (msg) ->
     room_question = all_questions[msg.envelope.room]
@@ -51,9 +61,8 @@ module.exports = (robot) ->
       s = msg.match[1].trim()
       r = room_question.match.get(s)
       if r.distance > 0.85
-        msg.send "Correct!! #{room_question.question} -- #{room_question.answer}"
-        delete all_questions[msg.envelope.room]
+        answerQuestion(true, msg)
 
   robot.respond /fuck.+question/, (msg) ->
     msg.send "Sorry :("
-    askQuestion(msg)
+    answerQuestion(false, msg)
