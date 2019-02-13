@@ -43,8 +43,11 @@ module.exports = (robot) ->
     if room_question == undefined || room_question.answer == null
       msg.send "Ask a question first"
       return
-    correctStr = correct ? "Correct!!" : ""
-    msg.send "#{correctStr} #{room_question.question} -- #{room_question.answer}"
+    if correct
+      correctStr = "Correct!! "
+    else
+      correctStr = ""
+    msg.send "#{correctStr}#{room_question.question} -- #{room_question.answer}"
     delete all_questions[msg.envelope.room]
     if continuous
       askQuestion(msg)
@@ -53,7 +56,7 @@ module.exports = (robot) ->
     askQuestion(msg)
 
   robot.respond /trivia answer/, (msg) ->
-    answer_question(false, msg)
+    answerQuestion(false, msg)
 
   robot.hear /(.+)/, (msg) ->
     room_question = all_questions[msg.envelope.room]
