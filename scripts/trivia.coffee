@@ -5,6 +5,8 @@
 #   hubot trivia answer
 
 fuzzy = require('fuzzy-matching')
+numtowords = require('number-to-words')
+wordstonum = require('words-to-numbers')
 continuous = true
 
 pruneAnswer = (answer) ->
@@ -17,6 +19,13 @@ pruneAnswer = (answer) ->
   punc_answer = answer.replace(/(\.|,|&|!)/g, '')
   if punc_answer != answer
     out.push(article_answer)
+  # Convert any numbers to word form
+  if answer.match(/^\d+$/)
+    out.push(numtowords.toWords(answer))
+  # Convert any word numbers into actual numbers
+  numword_answer = wordstonum.wordsToNumbers(answer)
+  if numword_answer != answer
+    out.push(numword_answer)
   return out
 
 module.exports = (robot) ->
