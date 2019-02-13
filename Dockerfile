@@ -8,7 +8,7 @@ USER user
 WORKDIR /home/user
 
 RUN yo hubot --adapter=slack --owner="Peter McNeill" --name="slackbot" --description="Hubot" --defaults && rm -f hubot-scripts.json
-RUN npm install --save hubot-redis-brain cheerio fuzzy-matching
+RUN npm install --save hubot-redis-brain cheerio fuzzy-matching number-to-words words-to-numbers
 
 CMD ["-a", "slack"]
 ENTRYPOINT ["./bin/hubot", "-n", "hubot"]

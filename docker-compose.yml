@@ -2,7 +2,7 @@ version: '2'
 services:
   hubot:
     restart: always
-    image: "hubot:latest"
+    build: .
     environment:
       - REDIS_URL=redis://redis:6379/hubot
     env_file: slack.key
