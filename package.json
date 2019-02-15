@@ -1,0 +1,22 @@
+{
+  "name": "slackbot",
+  "version": "0.0.0",
+  "private": true,
+  "author": "Peter McNeill",
+  "description": "Hubot",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "fuzzy-matching": "^0.4.3",
+    "hubot": "^3.2.0",
+    "hubot-diagnostics": "^1.0.0",
+    "hubot-help": "^1.0.1",
+    "hubot-redis-brain": "^1.0.0",
+    "hubot-rules": "^1.0.0",
+    "hubot-slack": "^4.6.0",
+    "number-to-words": "^1.2.4",
+    "words-to-numbers": "^1.5.1"
+  },
+  "engines": {
+    "node": "0.10.x"
+  }
+}
