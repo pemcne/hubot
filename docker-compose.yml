@@ -7,8 +7,7 @@ services:
       - REDIS_URL=redis://redis:6379/hubot
     env_file: slack.key
     volumes:
-      - ./scripts:/home/user/scripts:ro
-      - ./external-scripts.json:/home/user/external-scripts.json:ro
+      - ./scripts:/home/node/scripts:ro
     depends_on:
       - redis
   redis:
