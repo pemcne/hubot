@@ -2,13 +2,15 @@ FROM node:alpine
 
 MAINTAINER Peter McNeill
 
+ENV PATH="/home/node/node_modules/.bin/:${PATH}"
 RUN apk update && apk upgrade && apk add git make && rm -rf /var/cache/apk/*
-RUN npm install -g yo generator-hubot && adduser -s /bin/bash -S user
-USER user
-WORKDIR /home/user
+USER node
+WORKDIR /home/node
 
-RUN yo hubot --adapter=slack --owner="Peter McNeill" --name="slackbot" --description="Hubot" --defaults && rm -f hubot-scripts.json
-RUN npm install --save hubot-redis-brain cheerio fuzzy-matching number-to-words words-to-numbers
+ADD package.json /home/node/package.json
+ADD external-scripts.json /home/node/external-scripts.json
+
+RUN npm install
 
 CMD ["-a", "slack"]
-ENTRYPOINT ["./bin/hubot", "-n", "hubot"]
+ENTRYPOINT ["hubot", "-n", "hubot"]
