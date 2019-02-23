@@ -39,25 +39,33 @@ module.exports = (robot) ->
   askQuestion = (msg) ->
     room = getCurrentRoom(msg)
     # This random IP is from http://www.randomtriviagenerator.com/#/
-    robot.http('http://159.203.60.127/questions?limit=1').get() (err, res, body) ->
-      d = JSON.parse(body)
-      question = d.question
-      answer = d.answer
+    robot.http('https://opentdb.com/api.php?amount=1&type=multiple&encode=url3986').get() (err, res, body) ->
+      d = JSON.parse(body).results[0]
+      question = decodeURIComponent(d.question)
+      category = decodeURIComponent(d.category)
+      difficulty = d.difficulty
+      answer = decodeURIComponent(d.correct_answer)
+      choices = d.incorrect_answers
+      choices.push(answer)
+      choices.sort(() -> Math.random() - 0.5)
+      for i in [0...choices.length]
+        s = choices.shift()
+        choices.push(decodeURIComponent(s))
       fuzzy_answer = pruneAnswer(answer)
       answer_match = new fuzzy(fuzzy_answer)
-      categories = d['categories'].join(', ')
-      all_questions[room] = {
+      all_questions()[room] = {
         question: question
         answer: answer
         match: answer_match
         possible: fuzzy_answer
+        choices: choices
       }
       robot.logger.info('Possible answers:', fuzzy_answer.join(', '))
-      msg.send "[#{categories}] #{question}"
+      msg.send "[#{category} - #{difficulty}] #{question}"
 
   answerQuestion = (correct, msg) ->
     room = getCurrentRoom(msg)
-    room_question = all_questions[room]
+    room_question = all_questions()[room]
     if room_question == undefined || room_question.answer == null
       msg.send "Ask a question first"
       return
@@ -66,7 +74,7 @@ module.exports = (robot) ->
     else
       correctStr = ""
     msg.send "#{correctStr}#{room_question.question} -- #{room_question.answer}"
-    delete all_questions[room]
+    delete all_questions()[room]
     if continuous
       askQuestion(msg)
 
@@ -81,10 +89,16 @@ module.exports = (robot) ->
 
   robot.respond /trivia answer/, (msg) ->
     answerQuestion(false, msg)
+  
+  robot.respond /trivia hint/, (msg) ->
+    room = getCurrentRoom(msg)
+    room_question = all_questions()[room]
+    hint = room_question.choices.join('\n')
+    msg.send hint
 
   robot.hear /(.+)/, (msg) ->
     room = getCurrentRoom(msg)
-    room_question = all_questions[room]
+    room_question = all_questions()[room]
     if room_question != undefined
       s = msg.match[1].trim()
       r = room_question.match.get(s)
