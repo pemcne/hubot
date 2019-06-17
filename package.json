@@ -12,6 +12,7 @@
     "hubot-help": "^1.0.1",
     "hubot-redis-brain": "^1.0.0",
     "hubot-rules": "^1.0.0",
+    "hubot-schedule": "^0.6.2",
     "hubot-slack": "^4.6.0",
     "number-to-words": "^1.2.4",
     "wink-pos-tagger": "^2.2.2",
