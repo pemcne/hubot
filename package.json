@@ -14,6 +14,7 @@
     "hubot-rules": "^1.0.0",
     "hubot-slack": "^4.6.0",
     "number-to-words": "^1.2.4",
+    "wink-pos-tagger": "^2.2.2",
     "words-to-numbers": "^1.5.1"
   },
   "engines": {
