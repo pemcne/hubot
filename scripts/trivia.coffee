@@ -34,9 +34,15 @@ pruneAnswer = (answer) ->
   return out
 
 processOpentdbQuestion = (body) ->
+  banned_categories = [
+    'Entertainment: Japanese Anime & Manga',
+    'Entertainment: Video Games'
+  ]
   d = JSON.parse(body).results[0]
   question = decodeURIComponent(d.question)
   category = decodeURIComponent(d.category)
+  if category in banned_categories
+    return null
   answer = decodeURIComponent(d.correct_answer)
   choices = d.incorrect_answers
   choices.push(answer)
@@ -64,24 +70,46 @@ processTriviaGeneratorQuestion = (body) ->
     choices: null
   }
 
+processJeopardyQuestion = (body) ->
+  d = JSON.parse(body)
+  for i in d
+    if i.invalid_count?
+      continue
+    category = i.category.title
+    category = category.charAt(0).toUpperCase() + category.slice(1)
+    output = {
+      question: i.question,
+      category: category,
+      answer: i.answer,
+      choices: null
+    }
+    return output
+  return null
+
 module.exports = (robot) ->
   all_questions = () -> robot.brain.data.questions ?= {}
 
   askQuestion = (msg) ->
     room = getCurrentRoom(msg)
     sources = [{
-      name: 'OpenTDB'
-      url: 'https://opentdb.com/api.php?amount=1&type=multiple&encode=url3986'
+      name: 'OpenTDB',
+      url: 'https://opentdb.com/api.php?amount=1&type=multiple&encode=url3986',
       callback: processOpentdbQuestion
     }, {
-      name: 'TriviaGenerator'
-      url: 'http://159.203.60.127/questions?limit=1'
+      name: 'TriviaGenerator',
+      url: 'http://159.203.60.127/questions?limit=1',
       callback: processTriviaGeneratorQuestion
+    }, {
+      name: 'Jeopardy',
+      url: 'http://jservice.io/api/random?count=5',
+      callback: processJeopardyQuestion
     }]
     source = msg.random sources
     robot.logger.info("Pulling question from #{source.name}")
     robot.http(source.url).get() (err, res, body) ->
       question = source.callback(body)
+      if !question?
+        return askQuestion(msg)
       robot.logger.info('question', question)
       question.possible = pruneAnswer(question.answer)
       question.match = new fuzzy(question.possible)
