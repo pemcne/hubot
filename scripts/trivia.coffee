@@ -23,7 +23,7 @@ pruneAnswer = (answer) ->
   if answer.match(/^\d+$/)
     out.push(numtowords.toWords(answer))
   # Convert any word numbers into actual numbers
-  numword_answer = wordstonum.wordsToNumbers(answer)
+  numword_answer = wordstonum.wordsToNumbers(answer).toString()
   if numword_answer != answer
     out.push(numword_answer)
   decade_answer = answer.match(/^19(\d{2})s?$/)

@@ -5,3 +5,12 @@ module.exports = (robot) ->
 
   robot.hear /^NO U/, (msg) ->
     msg.send "NO U"
+
+  robot.hear /^good bot/i, (msg) ->
+    msg.send ":blush: thanks!"
+
+  robot.hear /fuck you hubot/i, (msg) ->
+    msg.send ":feelsangercryman:"
+  
+  robot.hear /^bad bot/i, (msg) ->
+    msg.send ":feelsbadman:"
