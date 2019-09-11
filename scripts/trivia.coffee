@@ -31,6 +31,9 @@ pruneAnswer = (answer) ->
     d = decade_answer[1]
     out.push("#{d}")
     out.push("#{d}s")
+  html_answer = answer.replace(/<[^>]+>/g, '')
+  if html_answer != answer
+    out.push(html_answer)
   return out
 
 processOpentdbQuestion = (body) ->
@@ -153,7 +156,7 @@ module.exports = (robot) ->
   robot.hear /(.+)/, (msg) ->
     room = getCurrentRoom(msg)
     room_question = all_questions()[room]
-    if room_question != undefined
+    if room_question != undefined && room_question.match
       s = msg.match[1].trim()
       r = room_question.match.get(s)
       robot.logger.info(room_question.answer, s, r)
