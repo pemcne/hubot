@@ -156,7 +156,7 @@ module.exports = (robot) ->
   robot.hear /(.+)/, (msg) ->
     room = getCurrentRoom(msg)
     room_question = all_questions()[room]
-    if room_question != undefined && room_question.match?
+    if room_question? && room_question.match?
       s = msg.match[1].trim()
       robot.logger.info("match get", room_question.match.get)
       r = room_question.match.get(s)
