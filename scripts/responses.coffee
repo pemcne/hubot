@@ -14,3 +14,6 @@ module.exports = (robot) ->
   
   robot.hear /^bad bot/i, (msg) ->
     msg.send ":feelsbadman:"
+    
+  robot.hear /god|jesus/i, (msg) ->
+    msg.send "Yes my child?"
