@@ -156,9 +156,8 @@ module.exports = (robot) ->
   robot.hear /(.+)/, (msg) ->
     room = getCurrentRoom(msg)
     room_question = all_questions()[room]
-    if room_question? && room_question.match?
+    if room_question? && room_question.match.get?
       s = msg.match[1].trim()
-      robot.logger.info("match get", room_question.match.get)
       r = room_question.match.get(s)
       robot.logger.info(room_question.answer, s, r)
       if r.distance > 0.85
