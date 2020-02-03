@@ -46,7 +46,8 @@ module.exports = (robot) ->
     msg.send msg.random choices[rand]
   
   robot.hear /^bad bot/i, (msg) ->
-    msg.send ":feelsbadman:"    
+    msg.send ":feelsbadman:"
+
   robot.hear /God damn/i, (msg) ->
     msg.send "Ehhh maybe later"
     
