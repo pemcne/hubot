@@ -47,9 +47,3 @@ module.exports = (robot) ->
   
   robot.hear /^bad bot/i, (msg) ->
     msg.send ":feelsbadman:"
-
-  robot.hear /God damn/i, (msg) ->
-    msg.send "Ehhh maybe later"
-    
-  robot.hear /^((?!God damn)god|jesus)/i, (msg) ->
-    msg.send "Yes my child?"
