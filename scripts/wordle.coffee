@@ -10,11 +10,25 @@ attempts = {
   'lewdle': 6,
   'dordle': 7
 }
+
+compute_stats = (gamestats, user) ->
+  if gamestats == undefined
+    output = "No stats yet"
+  else
+    scores = []
+    for game of gamestats
+      totalgames = gamestats[game].games
+      avg = (gamestats[game].score / totalgames).toPrecision(3)
+      attempt = attempts[game]
+      scores.push("#{game}:#{avg}/#{attempt} [#{totalgames} games]")
+    output = "Averages for #{user} - " + scores.join(' | ')
+  return output
+
 module.exports = (robot) ->
   allstats = () -> robot.brain.data.wordle ?= {}
 
   robot.hear /.*(Wordle|Lewdle|Dordle)\s\W?\d+\s(.+)\/\d/, (msg) ->
-    user = msg.envelope.user.name
+    user = msg.envelope.user.id
 
     game = msg.match[1].trim().toLowerCase()
     score = msg.match[2].trim()
@@ -35,25 +49,25 @@ module.exports = (robot) ->
     gamestats.games++
     userstats[game] = gamestats
     allstats()[user] = userstats
-    console.log(allstats())
   
   robot.respond /wordle stats/, (msg) ->
-    user = msg.envelope.user.name
+    user = msg.envelope.user.id
     gamestats = allstats()[user]
-    if gamestats == undefined
-      msg.send "No stats yet"
-    else
-      scores = []
-      for game of gamestats
-        totalgames = gamestats[game].games
-        avg = (gamestats[game].score / totalgames).toPrecision(3)
-        attempt = attempts[game]
-        scores.push("#{game}:#{avg}/#{attempt} [#{totalgames} games]")
-      output = "Averages for #{user} - " + scores.join(' | ')
-      msg.send output
+    output = compute_stats(gamestats, msg.envelope.user.name)
+    msg.send output
+  
+  # robot.respond /wordle stats for .+/, (msg) ->
+  #   if msg.message.mentions.length < 1
+  #     msg.send "Please @ the user to pull stats"
+  #   for mention in msg.message.mentions
+  #     user = mention.id
+  #     username = robot.brain.data.users[user].name
+  #     gamestats = allstats()[user]
+  #     output = compute_stats(gamestats, username)
+
   
   robot.respond /wordle import (Wordle|lewdle) (\d+) (\d+) (\d+) (\d+) (\d+) (\d+)/i, (msg) ->
-    user = msg.envelope.user.name
+    user = msg.envelope.user.id
 
     game = msg.match[1].trim().toLowerCase()
     score1 = msg.match[2].trim() * 1
@@ -72,6 +86,6 @@ module.exports = (robot) ->
     allstats()[user] = userstats
     msg.send "Imported scores for #{game} - #{gamestats.games} games"
 
-  robot.hear /wordle clear all stats/, (msg) ->
+  robot.respond /wordle clear all stats/, (msg) ->
     for key of allstats()
       delete allstats()[key]
