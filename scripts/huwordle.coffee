@@ -17,6 +17,7 @@ CORRECT = ':large_green_square:'
 PRESENT = ':large_yellow_square:'
 ABSENT = ':black_large_square:'
 ALPHABET = "abcdefghijklmnopqrstuvwxyz"
+ALLOWED_ROOMS = ["Shell", "C033N9SPX33"]
 
 module.exports = (robot) ->
   huwordle = () -> robot.brain.data.huwordle ?= {}
@@ -79,7 +80,7 @@ module.exports = (robot) ->
         index = wordchars.indexOf(c)
         if index == -1
           output[i] = ABSENT
-          if !(c in letters.absent)
+          if !(c in letters.absent) && !(c in letters.present)
             letters.absent.push(c)
         else
           output[i] = PRESENT
@@ -92,13 +93,13 @@ module.exports = (robot) ->
     return output
   
   emoji = (str) ->
-    output = []
+    output = ""
     for c in str
-      output.push(":alphabet-yellow-#{c}:")
+      output += ":alphabet-yellow-#{c}:"
     return output
 
   robot.respond /huwordle new/, (msg) ->
-    if msg.message.room != 'C033N9SPX33'
+    if !(msg.message.room in ALLOWED_ROOMS)
       return
     if huwordle().word != undefined
       msg.send "Previous word was '#{huwordle().word}'"
@@ -112,7 +113,7 @@ module.exports = (robot) ->
     msg.send "Strict mode is now: #{huwordle().strict_mode}"
   
   robot.hear /^(\w+)$/, (msg) ->
-    if msg.message.room != 'C033N9SPX33'
+    if !(msg.message.room in ALLOWED_ROOMS)
       return
     word = huwordle().word
     if word == undefined
@@ -125,12 +126,12 @@ module.exports = (robot) ->
       msg.send "'#{guess}' isn't in my dictionary"
       return
     results = process_guess(guess, word)
-    emoji_guess = emoji(guess)
-    output = "#{emoji_guess.join('')}\n#{results.join('')}\n"
+    output = "#{emoji(guess)}\n#{results.join('')}\n"
     output += print_state(won, false)
     msg.send output
     if won
       new_word(msg)
+    # console.log(huwordle().state.letters)
   
   robot.respond /huwordle current state/, (msg) ->
     state = huwordle().state
