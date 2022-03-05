@@ -5,6 +5,7 @@
   "author": "Peter McNeill",
   "description": "Hubot",
   "dependencies": {
+    "@slack/web-api": "^6.7.0",
     "cheerio": "^1.0.0-rc.2",
     "fuzzy-matching": "^0.4.3",
     "hubot": "^3.2.0",
@@ -17,8 +18,5 @@
     "number-to-words": "^1.2.4",
     "wink-pos-tagger": "^2.2.2",
     "words-to-numbers": "^1.5.1"
-  },
-  "engines": {
-    "node": "0.10.x"
   }
 }

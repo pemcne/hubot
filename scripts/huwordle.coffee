@@ -7,6 +7,7 @@
 
 fs = require 'fs'
 path = require 'path'
+{ WebClient } = require '@slack/web-api'
 
 dict_path = path.resolve(__dirname, "..", "misc/dictionary.json")
 ans_path = path.resolve(__dirname, '..', 'misc/answers.json')
@@ -20,6 +21,9 @@ ALPHABET = "abcdefghijklmnopqrstuvwxyz"
 ALLOWED_ROOMS = ["Shell", "C033N9SPX33"]
 
 module.exports = (robot) ->
+  # Setup slack web client
+  slackclient = new WebClient robot.adapter.options.token
+
   huwordle = () -> robot.brain.data.huwordle ?= {}
   array_remove = (arr, element) ->
     if element in arr
@@ -123,7 +127,12 @@ module.exports = (robot) ->
     if guess.length != word.length
       return
     if huwordle().strict_mode && !(guess in dict)
-      msg.send "'#{guess}' isn't in my dictionary"
+      slackclient.reactions.add {
+        name: 'x',
+        channel: msg.message.rawMessage.channel,
+        timestamp: msg.message.rawMessage.ts
+      }
+      # msg.send "'#{guess}' isn't in my dictionary"
       return
     results = process_guess(guess, word)
     output = "#{emoji(guess)}\n#{results.join('')}\n"
